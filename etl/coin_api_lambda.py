@@ -1,4 +1,3 @@
-#%%
 import urllib3
 import json
 import pandas as pd
@@ -50,7 +49,7 @@ def write_to_local():
     data.to_csv(filename)
 
 
-def lambda_handler():
+def lambda_handler(event,context):
     write_to_local()
     files = [f for f in listdir(LOCAL_FILE_SYS) if isfile(join(LOCAL_FILE_SYS, f))]
     for f in files:
