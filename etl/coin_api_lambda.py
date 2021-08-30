@@ -3,12 +3,13 @@ import json
 import pandas as pd
 import datetime
 import boto3
+import os
 from os import listdir
 from os.path import isfile, join
 
 s3_client = boto3.client("s3")
 LOCAL_FILE_SYS = "/tmp"
-S3_BUCKET = "coinapihourly"
+S3_BUCKET = os.environ['s3bucket']
 
 def get_key():
     from datetime import datetime
@@ -19,7 +20,6 @@ def get_key():
          + dt_now.strftime("%H")
         + "-"
         + dt_now.strftime("%M")
-        + "-"
     )
     return key
 
@@ -33,7 +33,7 @@ def get_data():
     http = urllib3.PoolManager()
     r = http.request(
             "GET",
-            'https://api.coincap.io/v2/rates/dogecoin')
+            'https://api.coincap.io/v2/rates/ethereum')
     data = json.loads(r.data.decode("utf8").replace("'", '"'))
     x = pd.json_normalize(data)
     x = x[['timestamp', 'data.rateUsd']]
@@ -53,7 +53,7 @@ def lambda_handler(event,context):
     write_to_local()
     files = [f for f in listdir(LOCAL_FILE_SYS) if isfile(join(LOCAL_FILE_SYS, f))]
     for f in files:
-        s3_client.upload_file(LOCAL_FILE_SYS + "/" + f, S3_BUCKET, key + f)
+        s3_client.upload_file(LOCAL_FILE_SYS + "/" + f, S3_BUCKET, f)
 
 
 
